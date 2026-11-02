@@ -35,7 +35,7 @@ CREATE TABLE bills (
         FOREIGN KEY (paid_by) REFERENCES members(id),
     
     CONSTRAINT chk_bill_description
-        CHECK (length(trim(description)) > 0),
+        CHECK (length(trim(description)) > 0)
     
     CONSTRAINT chk_bill_amount
         CHECK (amount > 0)
