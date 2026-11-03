@@ -10,11 +10,11 @@ export interface Member {
 }
 
 export interface Share {
-    id: string
-    memberId: string
-    memberName: string
-    amountCents: number
-    paidAt: string | null
+  id: string
+  memberId: string
+  memberName: string
+  amountCents: number
+  paidAt: string | null
 }
 
 export interface Bill {
@@ -29,20 +29,23 @@ interface BillsResponse {
 }
 
 export class ApiError extends Error {
-    constructor(message : string, public status : number) {
-        super(message)
-        this.name = "ApiError"
-    }    
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
 }
 
-async function handleResponse<T>(response : Response) : Promise<T> {
-    const data = await response.json().catch(() => null);
-    
-    if (!response.ok) {
-        throw new ApiError(data?.error || data?.message || 'something went wrong' , response.status);
-    }
+async function handleResponse<T>(response: Response): Promise<T> {
+  const data = await response.json().catch(() => null)
 
-    return data as T;
+  if (!response.ok) {
+    throw new ApiError(data?.error || data?.message || 'something went wrong', response.status)
+  }
+
+  return data as T
 }
 
 export async function createHome(name: string): Promise<Home> {
@@ -57,8 +60,7 @@ export async function createHome(name: string): Promise<Home> {
   return handleResponse<Home>(response)
 }
 
-
-export async function addMember(homeId: string,name: string,): Promise<Member> {
+export async function addMember(homeId: string, name: string): Promise<Member> {
   const response = await fetch(`/api/homes/${homeId}/members`, {
     method: 'POST',
     headers: {
@@ -70,7 +72,7 @@ export async function addMember(homeId: string,name: string,): Promise<Member> {
   return handleResponse<Member>(response)
 }
 
-export async function createBill(homeId: string, title: string,totalCents: number,): Promise<Bill> {
+export async function createBill(homeId: string, title: string, totalCents: number): Promise<Bill> {
   const response = await fetch(`/api/homes/${homeId}/bills`, {
     method: 'POST',
     headers: {
@@ -82,19 +84,19 @@ export async function createBill(homeId: string, title: string,totalCents: numbe
   return handleResponse<Bill>(response)
 }
 
-export async function getBills(homeId : string) : Promise<Bill[]> {
-    const response = await fetch(`/api/homes/${homeId}/bills` )
-    const data = await handleResponse<BillsResponse>(response)
-    return data.bills
+export async function getBills(homeId: string): Promise<Bill[]> {
+  const response = await fetch(`/api/homes/${homeId}/bills`)
+  const data = await handleResponse<BillsResponse>(response)
+  return data.bills
 }
 
-export async function payShare(billId : string, shareId : string) : Promise<Share> {
-    const response = await fetch(`/api/bills/${billId}/shares/${shareId}/pay`, {
-        method: 'POST',
-        headers: {
-            'Idempotency-Key': crypto.randomUUID(),
-        }
-    })
-    
-    return handleResponse<Share>(response)
+export async function payShare(billId: string, shareId: string): Promise<Share> {
+  const response = await fetch(`/api/bills/${billId}/shares/${shareId}/pay`, {
+    method: 'POST',
+    headers: {
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+  })
+
+  return handleResponse<Share>(response)
 }

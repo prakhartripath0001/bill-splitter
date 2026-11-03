@@ -1,6 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ApiError, createHome, addMember, createBill, getBills, payShare, type Bill } from '../lib/api'
+import {
+  ApiError,
+  addMember,
+  type Bill,
+  createBill,
+  createHome,
+  getBills,
+  payShare,
+} from '../lib/api'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -138,18 +146,18 @@ function Home() {
     setError('')
 
     try {
-      const updatedShare = await payShare(billId, shareId);
+      const updatedShare = await payShare(billId, shareId)
 
       setBills((currentBills) =>
         currentBills.map((bill) => ({
           ...bill,
           shares: bill.shares.map((share) => {
             if (share.id === updatedShare.id) {
-              return updatedShare;
+              return updatedShare
             }
             return share
           }),
-        }))
+        })),
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed')
@@ -163,8 +171,16 @@ function Home() {
       <h1>Bill Splitter</h1>
       <p>Manage your home expenses and track payments.</p>
 
-      {error && <p role="alert" style={{ color: 'red' }}>{error}</p>}
-      {message && <p role="status" style={{ color: 'green' }}>{message}</p>}
+      {error && (
+        <p role="alert" style={{ color: 'red' }}>
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" style={{ color: 'green' }}>
+          {message}
+        </p>
+      )}
 
       <section style={{ border: '1px solid #ddd', padding: 20, marginBottom: 20 }}>
         <h2>Create Home</h2>
@@ -232,17 +248,14 @@ function Home() {
 
         {loading && <p>Loading...</p>}
 
-        {!loading && bills.length === 0 && (
-          <p>No bills found.</p>
-        )}
+        {!loading && bills.length === 0 && <p>No bills found.</p>}
 
         {bills.map((bill) => (
-          <div
-            key={bill.id}
-            style={{ border: '1px solid #ddd', padding: 20, marginBottom: 15 }}
-          >
+          <div key={bill.id} style={{ border: '1px solid #ddd', padding: 20, marginBottom: 15 }}>
             <h3>{bill.title}</h3>
-            <p>Total: <strong>{formatMoney(bill.totalCents)}</strong></p>
+            <p>
+              Total: <strong>{formatMoney(bill.totalCents)}</strong>
+            </p>
 
             {bill.shares.map((share) => (
               <div

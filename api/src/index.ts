@@ -398,10 +398,7 @@ app.post('/api/bills/:billId/shares/:shareId/pay', async (c) => {
     }
 
     if (curShare.paid_at !== null) {
-      return c.json(
-        { error: 'Share has already been paid with a different idempotency key' },
-        409,
-      )
+      return c.json({ error: 'Share has already been paid with a different idempotency key' }, 409)
     }
 
     return c.json({ error: 'Failed to pay share' }, 500)
