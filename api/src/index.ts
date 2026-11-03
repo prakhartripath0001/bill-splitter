@@ -207,6 +207,90 @@ app.post('/api/homes/:homeId/bills', async (c) => {
   }
 })
 
+app.get('/api/homes/:homeId/bills', async (c) => {
+  const homeId = Number(c.req.param('homeId'))
+
+  if (!Number.isSafeInteger(homeId) || homeId <= 0) {
+    return c.json({ error: 'Invalid home id' }, 400)
+  }
+
+  try {
+    const home = await c.env.DB.prepare('SELECT id FROM homes WHERE id = ?')
+      .bind(homeId)
+      .first<{ id: number }>()
+
+    if (!home) {
+      return c.json({ error: 'Home not found with this id' }, 404)
+    }
+
+    const { results } = await c.env.DB.prepare(`
+            SELECT b.id AS billId, b.title AS title, b.total_cents AS totalCents, s.id as shareId, s.member_id AS memberId, m.name AS memberName, s.amount_cents AS amountCents, s.paid_at AS paidAt
+            FROM bills b
+            LEFT JOIN shares s ON s.bill_id = b.id
+            LEFT JOIN members m ON m.id = s.member_id
+            WHERE b.home_id = ?
+            ORDER BY b.id, s.id
+        `)
+      .bind(homeId)
+      .all<{
+        billId: number
+        title: string
+        totalCents: number
+        shareId: number | null
+        memberId: number | null
+        memberName: string | null
+        amountCents: number | null
+        paidAt: string | null
+      }>()
+
+    const bills = new Map<
+      number,
+      {
+        id: string
+        title: string
+        totalCents: number
+        shares: {
+          id: string
+          memberId: string
+          memberName: string
+          amountCents: number
+          paidAt: string | null
+        }[]
+      }
+    >()
+
+    for (const row of results) {
+      if (!bills.has(row.billId)) {
+        bills.set(row.billId, {
+          id: String(row.billId),
+          title: row.title,
+          totalCents: row.totalCents,
+          shares: [],
+        })
+      }
+
+      if (
+        row.shareId !== null &&
+        row.memberId !== null &&
+        row.memberName !== null &&
+        row.amountCents !== null
+      ) {
+        bills.get(row.billId)?.shares.push({
+          id: String(row.shareId),
+          memberId: String(row.memberId),
+          memberName: row.memberName,
+          amountCents: row.amountCents,
+          paidAt: row.paidAt,
+        })
+      }
+    }
+
+    return c.json({ bills: Array.from(bills.values()) }, 200)
+  } catch {
+    return c.json({ error: 'Failed to fetch bills' }, 500)
+  }
+})
+
 app.post('/api/bills/:billId/shares/:shareId/pay', async (c) => {
   const billId = Number(c.req.param('billId'))
   const shareId = Number(c.req.param('shareId'))
