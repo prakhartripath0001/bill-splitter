@@ -259,4 +259,31 @@ app.post('/api/bills/:billId/shares/:shareId/pay', async (c) => {
     }
 })
 
+app.get('/api/homes/:homeId/balances', async (c) => {
+    const homeId = Number(c.req.param('homeId'))
+
+    if (!Number.isSafeInteger(homeId) || homeId <= 0) {
+        return c.json({ error : 'Home not found with this id'}, 404)
+    }
+    
+    const home = await c.env.DB.prepare('SELECT id FROM homes WHERE id = ?').bind(homeId).first<{id: number}>()
+
+    if (!home) {
+        return c.json({ error : 'Home not found with this id'}, 404)
+    }
+
+    const { results } = await c.env.DB.prepare(`
+        SELECT m.id AS member_id, m.name AS name, 
+            COALESCE(SUM(s.amount_cents), 0) AS outstandingCents
+        FROM members m
+        LEFT JOIN bills b ON b.home_id = m.home_id
+        LEFT JOIN shares s ON s.bill_id = b.id AND s.member_id = m.id AND s.paid_at IS NULL
+        WHERE m.home_id = ?
+        GROUP BY m.id, m.name
+        ORDER BY m.id
+    `).bind(homeId).all();
+
+    return c.json({ balances : results }, 200);
+})
+
 export default app
