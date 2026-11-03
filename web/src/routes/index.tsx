@@ -1,14 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import {
-  ApiError,
-  addMember,
-  type Bill,
-  createBill,
-  createHome,
-  getBills,
-  payShare,
-} from '../lib/api'
+import { addMember, type Bill, createBill, createHome, getBills, payShare } from '../lib/api'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -189,7 +181,7 @@ function Home() {
           onChange={(e) => setHomeName(e.target.value)}
           placeholder="Enter home name"
         />
-        <button onClick={handleCreateHome} disabled={loading}>
+        <button type="button" onClick={handleCreateHome} disabled={loading}>
           Create Home
         </button>
       </section>
@@ -201,7 +193,7 @@ function Home() {
           onChange={(e) => setHomeId(e.target.value)}
           placeholder="Enter Home ID"
         />
-        <button onClick={handleLoadBills} disabled={loading}>
+        <button type="button" onClick={handleLoadBills} disabled={loading}>
           Load Home
         </button>
       </section>
@@ -215,7 +207,7 @@ function Home() {
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="Enter member name"
             />
-            <button onClick={handleAddMember} disabled={loading}>
+            <button type="button" onClick={handleAddMember} disabled={loading}>
               Add Member
             </button>
           </section>
@@ -236,7 +228,7 @@ function Home() {
               placeholder="Total amount in cents"
             />
             <p>Example: 1000 cents = $10.00</p>
-            <button onClick={handleCreateBill} disabled={loading}>
+            <button type="button" onClick={handleCreateBill} disabled={loading}>
               Add Bill & Split
             </button>
           </section>
@@ -276,6 +268,7 @@ function Home() {
 
                 {!share.paidAt && (
                   <button
+                    type="button"
                     onClick={() => handlePay(bill.id, share.id)}
                     disabled={payingShareId !== null}
                   >
