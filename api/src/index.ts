@@ -342,7 +342,7 @@ app.get('/api/homes/:homeId/balances', async (c) => {
   }
 
   const { results } = await c.env.DB.prepare(`
-        SELECT m.id AS member_id, m.name AS name, 
+        SELECT m.id AS memberId, m.name AS name, 
             COALESCE(SUM(s.amount_cents), 0) AS outstandingCents
         FROM members m
         LEFT JOIN bills b ON b.home_id = m.home_id
@@ -354,7 +354,10 @@ app.get('/api/homes/:homeId/balances', async (c) => {
     .bind(homeId)
     .all()
 
-  return c.json({ balances: results }, 200)
+  return c.json(
+    { balances: results.map((member) => ({ ...member, memberId: String(member.memberId) })) },
+    200,
+  )
 })
 
 export default app
