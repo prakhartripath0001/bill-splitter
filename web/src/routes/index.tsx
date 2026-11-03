@@ -25,8 +25,12 @@ function Home() {
     }).format(cents / 100)
 
   async function refreshBills(id: string) {
-    const data = await getBills(id)
-    setBills(data)
+    try {
+      const data = await getBills(id)
+      setBills(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load bills')
+    }
   }
 
   async function handleCreateHome() {
@@ -79,6 +83,11 @@ function Home() {
 
     if (!homeId.trim() || !billTitle.trim()) {
       setError('Enter a home ID and bill title')
+      return
+    }
+
+    if (!/^[0-9]+$/.test(totalCents)) {
+      setError('Amount must be a whole number of cents')
       return
     }
 
